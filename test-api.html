@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <h1>Prueba de Conexión API Backend</h1>
+    
+    <div class="test-section">
+        <h3>Prueba de Categorías</h3>
+        <button onclick="testCategorias()">Obtener Categorías</button>
+        <button onclick="testCreateCategoria()">Crear Categoría de Prueba</button>
+        <div id="categorias-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>Prueba de Productos</h3>
+        <button onclick="testProductos()">Obtener Productos</button>
+        <div id="productos-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8081/api';
+        
+        async function makeRequest(url, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+                
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+                
+                const response = await fetch(url, options);
+                const result = await response.text();
+                
+                return {
+                    status: response.status,
+                    statusText: response.statusText,
+                    data: result
+                };
+            } catch (error) {
+                return {
+                    error: error.message
+                };
+            }
+        }
+        
+        async function testCategorias() {
+            const result = await makeRequest(`${API_BASE}/categorias`);
+            const element = document.getElementById('categorias-result');
+            
+            if (result.error) {
+                element.className = 'result error';
+                element.textContent = `Error: ${result.error}\n\n¿Está el backend ejecutándose en el puerto 8081?`;
+            } else {
+                element.className = 'result success';
+                element.textContent = `Status: ${result.status}\nRespuesta: ${result.data}`;
+            }
+        }
+        
+        async function testCreateCategoria() {
+            const categoria = { nombre: 'Categoría de Prueba' };
+            const result = await makeRequest(`${API_BASE}/categorias`, 'POST', categoria);
+            const element = document.getElementById('categorias-result');
+            
+            if (result.error) {
+                element.className = 'result error';
+                element.textContent = `Error: ${result.error}`;
+            } else {
+                element.className = 'result success';
+                element.textContent = `Status: ${result.status}\nRespuesta: ${result.data}`;
+            }
+        }
+        
+        async function testProductos() {
+            const result = await makeRequest(`${API_BASE}/productos`);
+            const element = document.getElementById('productos-result');
+            
+            if (result.error) {
+                element.className = 'result error';
+                element.textContent = `Error: ${result.error}`;
+            } else {
+                element.className = 'result success';
+                element.textContent = `Status: ${result.status}\nRespuesta: ${result.data}`;
+            }
+        }
+    </script>
+</body>
+</html>
